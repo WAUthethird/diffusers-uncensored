@@ -595,7 +595,7 @@ class DiffusionPipeline(ConfigMixin):
 
         init_dict = {k: v for k, v in init_dict.items() if load_module(k, v)}
 
-        if len(unused_kwargs) > 0:
+        if len(unused_kwargs) > 0 and not unused_kwargs == {'safety_checker': ['stable_diffusion', 'StableDiffusionSafetyChecker']}:
             logger.warning(
                 f"Keyword arguments {unused_kwargs} are not expected by {pipeline_class.__name__} and will be ignored."
             )

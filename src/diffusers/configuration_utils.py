@@ -452,7 +452,7 @@ class ConfigMixin:
                 init_dict[key] = config_dict.pop(key)
 
         # 4. Give nice warning if unexpected values have been passed
-        if len(config_dict) > 0:
+        if len(config_dict) > 0 and not config_dict == {'safety_checker': ['stable_diffusion', 'StableDiffusionSafetyChecker']}:
             logger.warning(
                 f"The config attributes {config_dict} were passed to {cls.__name__}, "
                 "but are not expected and will be ignored. Please verify your "
