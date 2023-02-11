@@ -538,7 +538,6 @@ def main(args):
             pipeline = DiffusionPipeline.from_pretrained(
                 args.pretrained_model_name_or_path,
                 torch_dtype=torch_dtype,
-                safety_checker=None,
                 revision=args.revision,
             )
             pipeline.set_progress_bar_config(disable=True)

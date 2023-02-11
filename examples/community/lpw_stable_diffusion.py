@@ -11,7 +11,7 @@ from transformers import CLIPFeatureExtractor, CLIPTextModel, CLIPTokenizer
 import diffusers
 from diffusers import SchedulerMixin, StableDiffusionPipeline
 from diffusers.models import AutoencoderKL, UNet2DConditionModel
-from diffusers.pipelines.stable_diffusion import StableDiffusionPipelineOutput, StableDiffusionSafetyChecker
+from diffusers.pipelines.stable_diffusion import StableDiffusionPipelineOutput
 from diffusers.utils import deprecate, logging
 
 
@@ -420,11 +420,6 @@ class StableDiffusionLongPromptWeightingPipeline(StableDiffusionPipeline):
         scheduler ([`SchedulerMixin`]):
             A scheduler to be used in combination with `unet` to denoise the encoded image latents. Can be one of
             [`DDIMScheduler`], [`LMSDiscreteScheduler`], or [`PNDMScheduler`].
-        safety_checker ([`StableDiffusionSafetyChecker`]):
-            Classification module that estimates whether generated images could be considered offensive or harmful.
-            Please, refer to the [model card](https://huggingface.co/CompVis/stable-diffusion-v1-4) for details.
-        feature_extractor ([`CLIPFeatureExtractor`]):
-            Model that extracts features from generated images to be used as inputs for the `safety_checker`.
     """
 
     if version.parse(version.parse(diffusers.__version__).base_version) >= version.parse("0.9.0"):
@@ -436,9 +431,7 @@ class StableDiffusionLongPromptWeightingPipeline(StableDiffusionPipeline):
             tokenizer: CLIPTokenizer,
             unet: UNet2DConditionModel,
             scheduler: SchedulerMixin,
-            safety_checker: StableDiffusionSafetyChecker,
             feature_extractor: CLIPFeatureExtractor,
-            requires_safety_checker: bool = True,
         ):
             super().__init__(
                 vae=vae,
@@ -446,9 +439,7 @@ class StableDiffusionLongPromptWeightingPipeline(StableDiffusionPipeline):
                 tokenizer=tokenizer,
                 unet=unet,
                 scheduler=scheduler,
-                safety_checker=safety_checker,
                 feature_extractor=feature_extractor,
-                requires_safety_checker=requires_safety_checker,
             )
             self.__init__additional__()
 
@@ -461,7 +452,6 @@ class StableDiffusionLongPromptWeightingPipeline(StableDiffusionPipeline):
             tokenizer: CLIPTokenizer,
             unet: UNet2DConditionModel,
             scheduler: SchedulerMixin,
-            safety_checker: StableDiffusionSafetyChecker,
             feature_extractor: CLIPFeatureExtractor,
         ):
             super().__init__(
@@ -470,7 +460,6 @@ class StableDiffusionLongPromptWeightingPipeline(StableDiffusionPipeline):
                 tokenizer=tokenizer,
                 unet=unet,
                 scheduler=scheduler,
-                safety_checker=safety_checker,
                 feature_extractor=feature_extractor,
             )
             self.__init__additional__()
@@ -585,16 +574,6 @@ class StableDiffusionLongPromptWeightingPipeline(StableDiffusionPipeline):
             t_start = max(num_inference_steps - init_timestep + offset, 0)
             timesteps = self.scheduler.timesteps[t_start:].to(device)
             return timesteps, num_inference_steps - t_start
-
-    def run_safety_checker(self, image, device, dtype):
-        if self.safety_checker is not None:
-            safety_checker_input = self.feature_extractor(self.numpy_to_pil(image), return_tensors="pt").to(device)
-            image, has_nsfw_concept = self.safety_checker(
-                images=image, clip_input=safety_checker_input.pixel_values.to(dtype)
-            )
-        else:
-            has_nsfw_concept = None
-        return image, has_nsfw_concept
 
     def decode_latents(self, latents):
         latents = 1 / 0.18215 * latents
@@ -754,9 +733,7 @@ class StableDiffusionLongPromptWeightingPipeline(StableDiffusionPipeline):
             `None` if cancelled by `is_cancelled_callback`,
             [`~pipelines.stable_diffusion.StableDiffusionPipelineOutput`] or `tuple`:
             [`~pipelines.stable_diffusion.StableDiffusionPipelineOutput`] if `return_dict` is True, otherwise a `tuple.
-            When returning a tuple, the first element is a list with the generated images, and the second element is a
-            list of `bool`s denoting whether the corresponding generated image likely represents "not-safe-for-work"
-            (nsfw) content, according to the `safety_checker`.
+            When returning a tuple, the first element is a list with the generated images.
         """
         message = "Please use `image` instead of `init_image`."
         init_image = deprecate("init_image", "0.14.0", message, take_from=kwargs)
@@ -854,17 +831,14 @@ class StableDiffusionLongPromptWeightingPipeline(StableDiffusionPipeline):
         # 9. Post-processing
         image = self.decode_latents(latents)
 
-        # 10. Run safety checker
-        image, has_nsfw_concept = self.run_safety_checker(image, device, text_embeddings.dtype)
-
         # 11. Convert to PIL
         if output_type == "pil":
             image = self.numpy_to_pil(image)
 
         if not return_dict:
-            return image, has_nsfw_concept
+            return image
 
-        return StableDiffusionPipelineOutput(images=image, nsfw_content_detected=has_nsfw_concept)
+        return StableDiffusionPipelineOutput(images=image)
 
     def text2img(
         self,
@@ -939,9 +913,7 @@ class StableDiffusionLongPromptWeightingPipeline(StableDiffusionPipeline):
         Returns:
             [`~pipelines.stable_diffusion.StableDiffusionPipelineOutput`] or `tuple`:
             [`~pipelines.stable_diffusion.StableDiffusionPipelineOutput`] if `return_dict` is True, otherwise a `tuple.
-            When returning a tuple, the first element is a list with the generated images, and the second element is a
-            list of `bool`s denoting whether the corresponding generated image likely represents "not-safe-for-work"
-            (nsfw) content, according to the `safety_checker`.
+            When returning a tuple, the first element is a list with the generated images.
         """
         return self.__call__(
             prompt=prompt,
@@ -1036,9 +1008,7 @@ class StableDiffusionLongPromptWeightingPipeline(StableDiffusionPipeline):
         Returns:
             [`~pipelines.stable_diffusion.StableDiffusionPipelineOutput`] or `tuple`:
             [`~pipelines.stable_diffusion.StableDiffusionPipelineOutput`] if `return_dict` is True, otherwise a `tuple.
-            When returning a tuple, the first element is a list with the generated images, and the second element is a
-            list of `bool`s denoting whether the corresponding generated image likely represents "not-safe-for-work"
-            (nsfw) content, according to the `safety_checker`.
+            When returning a tuple, the first element is a list with the generated images.
         """
         return self.__call__(
             prompt=prompt,
@@ -1137,9 +1107,7 @@ class StableDiffusionLongPromptWeightingPipeline(StableDiffusionPipeline):
         Returns:
             [`~pipelines.stable_diffusion.StableDiffusionPipelineOutput`] or `tuple`:
             [`~pipelines.stable_diffusion.StableDiffusionPipelineOutput`] if `return_dict` is True, otherwise a `tuple.
-            When returning a tuple, the first element is a list with the generated images, and the second element is a
-            list of `bool`s denoting whether the corresponding generated image likely represents "not-safe-for-work"
-            (nsfw) content, according to the `safety_checker`.
+            When returning a tuple, the first element is a list with the generated images.
         """
         return self.__call__(
             prompt=prompt,

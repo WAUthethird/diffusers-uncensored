@@ -83,7 +83,6 @@ class PaintByExamplePipelineFastTests(PipelineTesterMixin, unittest.TestCase):
             "scheduler": scheduler,
             "vae": vae,
             "image_encoder": image_encoder,
-            "safety_checker": None,
             "feature_extractor": feature_extractor,
         }
         return components

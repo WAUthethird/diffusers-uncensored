@@ -84,7 +84,6 @@ class CycleDiffusionPipelineFastTests(PipelineTesterMixin, unittest.TestCase):
             "vae": vae,
             "text_encoder": text_encoder,
             "tokenizer": tokenizer,
-            "safety_checker": None,
             "feature_extractor": None,
         }
         return components
@@ -172,7 +171,7 @@ class CycleDiffusionPipelineIntegrationTests(unittest.TestCase):
         model_id = "CompVis/stable-diffusion-v1-4"
         scheduler = DDIMScheduler.from_pretrained(model_id, subfolder="scheduler")
         pipe = CycleDiffusionPipeline.from_pretrained(
-            model_id, scheduler=scheduler, safety_checker=None, torch_dtype=torch.float16, revision="fp16"
+            model_id, scheduler=scheduler, torch_dtype=torch.float16, revision="fp16"
         )
 
         pipe.to(torch_device)
@@ -212,7 +211,7 @@ class CycleDiffusionPipelineIntegrationTests(unittest.TestCase):
 
         model_id = "CompVis/stable-diffusion-v1-4"
         scheduler = DDIMScheduler.from_pretrained(model_id, subfolder="scheduler")
-        pipe = CycleDiffusionPipeline.from_pretrained(model_id, scheduler=scheduler, safety_checker=None)
+        pipe = CycleDiffusionPipeline.from_pretrained(model_id, scheduler=scheduler,)
 
         pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)

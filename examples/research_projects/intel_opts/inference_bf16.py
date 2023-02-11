@@ -30,13 +30,11 @@ model = model.to(device)
 model.unet = model.unet.to(memory_format=torch.channels_last)
 model.vae = model.vae.to(memory_format=torch.channels_last)
 model.text_encoder = model.text_encoder.to(memory_format=torch.channels_last)
-model.safety_checker = model.safety_checker.to(memory_format=torch.channels_last)
 
 # optimize with ipex
 model.unet = ipex.optimize(model.unet.eval(), dtype=torch.bfloat16, inplace=True)
 model.vae = ipex.optimize(model.vae.eval(), dtype=torch.bfloat16, inplace=True)
 model.text_encoder = ipex.optimize(model.text_encoder.eval(), dtype=torch.bfloat16, inplace=True)
-model.safety_checker = ipex.optimize(model.safety_checker.eval(), dtype=torch.bfloat16, inplace=True)
 
 # compute
 seed = 666

@@ -37,10 +37,9 @@ class OnnxStableDiffusionPipeline(DiffusionPipeline):
     tokenizer: CLIPTokenizer
     unet: OnnxRuntimeModel
     scheduler: Union[DDIMScheduler, PNDMScheduler, LMSDiscreteScheduler]
-    safety_checker: OnnxRuntimeModel
     feature_extractor: CLIPFeatureExtractor
 
-    _optional_components = ["safety_checker", "feature_extractor"]
+    _optional_components = ["feature_extractor"]
 
     def __init__(
         self,
@@ -50,9 +49,7 @@ class OnnxStableDiffusionPipeline(DiffusionPipeline):
         tokenizer: CLIPTokenizer,
         unet: OnnxRuntimeModel,
         scheduler: Union[DDIMScheduler, PNDMScheduler, LMSDiscreteScheduler],
-        safety_checker: OnnxRuntimeModel,
         feature_extractor: CLIPFeatureExtractor,
-        requires_safety_checker: bool = True,
     ):
         super().__init__()
 
@@ -83,22 +80,6 @@ class OnnxStableDiffusionPipeline(DiffusionPipeline):
             new_config["clip_sample"] = False
             scheduler._internal_dict = FrozenDict(new_config)
 
-        if safety_checker is None and requires_safety_checker:
-            logger.warning(
-                f"You have disabled the safety checker for {self.__class__} by passing `safety_checker=None`. Ensure"
-                " that you abide to the conditions of the Stable Diffusion license and do not expose unfiltered"
-                " results in services or applications open to the public. Both the diffusers team and Hugging Face"
-                " strongly recommend to keep the safety filter enabled in all public facing circumstances, disabling"
-                " it only for use-cases that involve analyzing network behavior or auditing its results. For more"
-                " information, please have a look at https://github.com/huggingface/diffusers/pull/254 ."
-            )
-
-        if safety_checker is not None and feature_extractor is None:
-            raise ValueError(
-                "Make sure to define a feature extractor when loading {self.__class__} if you want to use the safety"
-                " checker. If you do not want to use the safety checker, you can pass `'safety_checker=None'` instead."
-            )
-
         self.register_modules(
             vae_encoder=vae_encoder,
             vae_decoder=vae_decoder,
@@ -106,10 +87,8 @@ class OnnxStableDiffusionPipeline(DiffusionPipeline):
             tokenizer=tokenizer,
             unet=unet,
             scheduler=scheduler,
-            safety_checker=safety_checker,
             feature_extractor=feature_extractor,
         )
-        self.register_to_config(requires_safety_checker=requires_safety_checker)
 
     def _encode_prompt(self, prompt, num_images_per_prompt, do_classifier_free_guidance, negative_prompt):
         r"""
@@ -298,32 +277,13 @@ class OnnxStableDiffusionPipeline(DiffusionPipeline):
         image = np.clip(image / 2 + 0.5, 0, 1)
         image = image.transpose((0, 2, 3, 1))
 
-        if self.safety_checker is not None:
-            safety_checker_input = self.feature_extractor(
-                self.numpy_to_pil(image), return_tensors="np"
-            ).pixel_values.astype(image.dtype)
-
-            image, has_nsfw_concepts = self.safety_checker(clip_input=safety_checker_input, images=image)
-
-            # There will throw an error if use safety_checker batchsize>1
-            images, has_nsfw_concept = [], []
-            for i in range(image.shape[0]):
-                image_i, has_nsfw_concept_i = self.safety_checker(
-                    clip_input=safety_checker_input[i : i + 1], images=image[i : i + 1]
-                )
-                images.append(image_i)
-                has_nsfw_concept.append(has_nsfw_concept_i[0])
-            image = np.concatenate(images)
-        else:
-            has_nsfw_concept = None
-
         if output_type == "pil":
             image = self.numpy_to_pil(image)
 
         if not return_dict:
-            return (image, has_nsfw_concept)
+            return (image)
 
-        return StableDiffusionPipelineOutput(images=image, nsfw_content_detected=has_nsfw_concept)
+        return StableDiffusionPipelineOutput(images=image)
 
 
 class StableDiffusionOnnxPipeline(OnnxStableDiffusionPipeline):
@@ -335,7 +295,6 @@ class StableDiffusionOnnxPipeline(OnnxStableDiffusionPipeline):
         tokenizer: CLIPTokenizer,
         unet: OnnxRuntimeModel,
         scheduler: Union[DDIMScheduler, PNDMScheduler, LMSDiscreteScheduler],
-        safety_checker: OnnxRuntimeModel,
         feature_extractor: CLIPFeatureExtractor,
     ):
         deprecation_message = "Please use `OnnxStableDiffusionPipeline` instead of `StableDiffusionOnnxPipeline`."
@@ -347,6 +306,5 @@ class StableDiffusionOnnxPipeline(OnnxStableDiffusionPipeline):
             tokenizer=tokenizer,
             unet=unet,
             scheduler=scheduler,
-            safety_checker=safety_checker,
             feature_extractor=feature_extractor,
         )

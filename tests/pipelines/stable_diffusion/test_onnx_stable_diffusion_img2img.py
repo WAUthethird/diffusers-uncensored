@@ -175,7 +175,6 @@ class OnnxStableDiffusionImg2ImgPipelineIntegrationTests(unittest.TestCase):
         pipe = OnnxStableDiffusionImg2ImgPipeline.from_pretrained(
             "CompVis/stable-diffusion-v1-4",
             revision="onnx",
-            safety_checker=None,
             feature_extractor=None,
             provider=self.gpu_provider,
             sess_options=self.gpu_options,
@@ -216,7 +215,6 @@ class OnnxStableDiffusionImg2ImgPipelineIntegrationTests(unittest.TestCase):
             "runwayml/stable-diffusion-v1-5",
             revision="onnx",
             scheduler=lms_scheduler,
-            safety_checker=None,
             feature_extractor=None,
             provider=self.gpu_provider,
             sess_options=self.gpu_options,

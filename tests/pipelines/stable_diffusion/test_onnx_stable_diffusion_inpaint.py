@@ -70,7 +70,6 @@ class OnnxStableDiffusionInpaintPipelineIntegrationTests(unittest.TestCase):
         pipe = OnnxStableDiffusionInpaintPipeline.from_pretrained(
             "runwayml/stable-diffusion-inpainting",
             revision="onnx",
-            safety_checker=None,
             feature_extractor=None,
             provider=self.gpu_provider,
             sess_options=self.gpu_options,
@@ -113,7 +112,6 @@ class OnnxStableDiffusionInpaintPipelineIntegrationTests(unittest.TestCase):
             "runwayml/stable-diffusion-inpainting",
             revision="onnx",
             scheduler=lms_scheduler,
-            safety_checker=None,
             feature_extractor=None,
             provider=self.gpu_provider,
             sess_options=self.gpu_options,

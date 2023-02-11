@@ -417,7 +417,7 @@ class StableDiffusionDepth2ImgPipelineSlowTests(unittest.TestCase):
 
     def test_stable_diffusion_depth2img_pipeline_default(self):
         pipe = StableDiffusionDepth2ImgPipeline.from_pretrained(
-            "stabilityai/stable-diffusion-2-depth", safety_checker=None
+            "stabilityai/stable-diffusion-2-depth",
         )
         pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)
@@ -434,7 +434,7 @@ class StableDiffusionDepth2ImgPipelineSlowTests(unittest.TestCase):
 
     def test_stable_diffusion_depth2img_pipeline_k_lms(self):
         pipe = StableDiffusionDepth2ImgPipeline.from_pretrained(
-            "stabilityai/stable-diffusion-2-depth", safety_checker=None
+            "stabilityai/stable-diffusion-2-depth",
         )
         pipe.scheduler = LMSDiscreteScheduler.from_config(pipe.scheduler.config)
         pipe.to(torch_device)
@@ -452,7 +452,7 @@ class StableDiffusionDepth2ImgPipelineSlowTests(unittest.TestCase):
 
     def test_stable_diffusion_depth2img_pipeline_ddim(self):
         pipe = StableDiffusionDepth2ImgPipeline.from_pretrained(
-            "stabilityai/stable-diffusion-2-depth", safety_checker=None
+            "stabilityai/stable-diffusion-2-depth",
         )
         pipe.scheduler = DDIMScheduler.from_config(pipe.scheduler.config)
         pipe.to(torch_device)
@@ -497,7 +497,7 @@ class StableDiffusionDepth2ImgPipelineSlowTests(unittest.TestCase):
         callback_fn.has_been_called = False
 
         pipe = StableDiffusionDepth2ImgPipeline.from_pretrained(
-            "stabilityai/stable-diffusion-2-depth", safety_checker=None, torch_dtype=torch.float16
+            "stabilityai/stable-diffusion-2-depth", torch_dtype=torch.float16
         )
         pipe = pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)
@@ -514,7 +514,7 @@ class StableDiffusionDepth2ImgPipelineSlowTests(unittest.TestCase):
         torch.cuda.reset_peak_memory_stats()
 
         pipe = StableDiffusionDepth2ImgPipeline.from_pretrained(
-            "stabilityai/stable-diffusion-2-depth", safety_checker=None, torch_dtype=torch.float16
+            "stabilityai/stable-diffusion-2-depth", torch_dtype=torch.float16
         )
         pipe = pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)

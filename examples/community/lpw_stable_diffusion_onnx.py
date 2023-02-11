@@ -440,9 +440,7 @@ class OnnxStableDiffusionLongPromptWeightingPipeline(OnnxStableDiffusionPipeline
             tokenizer: CLIPTokenizer,
             unet: OnnxRuntimeModel,
             scheduler: SchedulerMixin,
-            safety_checker: OnnxRuntimeModel,
             feature_extractor: CLIPFeatureExtractor,
-            requires_safety_checker: bool = True,
         ):
             super().__init__(
                 vae_encoder=vae_encoder,
@@ -451,9 +449,7 @@ class OnnxStableDiffusionLongPromptWeightingPipeline(OnnxStableDiffusionPipeline
                 tokenizer=tokenizer,
                 unet=unet,
                 scheduler=scheduler,
-                safety_checker=safety_checker,
                 feature_extractor=feature_extractor,
-                requires_safety_checker=requires_safety_checker,
             )
             self.__init__additional__()
 
@@ -467,7 +463,6 @@ class OnnxStableDiffusionLongPromptWeightingPipeline(OnnxStableDiffusionPipeline
             tokenizer: CLIPTokenizer,
             unet: OnnxRuntimeModel,
             scheduler: SchedulerMixin,
-            safety_checker: OnnxRuntimeModel,
             feature_extractor: CLIPFeatureExtractor,
         ):
             super().__init__(
@@ -477,7 +472,6 @@ class OnnxStableDiffusionLongPromptWeightingPipeline(OnnxStableDiffusionPipeline
                 tokenizer=tokenizer,
                 unet=unet,
                 scheduler=scheduler,
-                safety_checker=safety_checker,
                 feature_extractor=feature_extractor,
             )
             self.__init__additional__()
@@ -567,24 +561,6 @@ class OnnxStableDiffusionLongPromptWeightingPipeline(OnnxStableDiffusionPipeline
             t_start = max(num_inference_steps - init_timestep + offset, 0)
             timesteps = self.scheduler.timesteps[t_start:]
             return timesteps, num_inference_steps - t_start
-
-    def run_safety_checker(self, image):
-        if self.safety_checker is not None:
-            safety_checker_input = self.feature_extractor(
-                self.numpy_to_pil(image), return_tensors="np"
-            ).pixel_values.astype(image.dtype)
-            # There will throw an error if use safety_checker directly and batchsize>1
-            images, has_nsfw_concept = [], []
-            for i in range(image.shape[0]):
-                image_i, has_nsfw_concept_i = self.safety_checker(
-                    clip_input=safety_checker_input[i : i + 1], images=image[i : i + 1]
-                )
-                images.append(image_i)
-                has_nsfw_concept.append(has_nsfw_concept_i[0])
-            image = np.concatenate(images)
-        else:
-            has_nsfw_concept = None
-        return image, has_nsfw_concept
 
     def decode_latents(self, latents):
         latents = 1 / 0.18215 * latents
@@ -740,9 +716,7 @@ class OnnxStableDiffusionLongPromptWeightingPipeline(OnnxStableDiffusionPipeline
             `None` if cancelled by `is_cancelled_callback`,
             [`~pipelines.stable_diffusion.StableDiffusionPipelineOutput`] or `tuple`:
             [`~pipelines.stable_diffusion.StableDiffusionPipelineOutput`] if `return_dict` is True, otherwise a `tuple.
-            When returning a tuple, the first element is a list with the generated images, and the second element is a
-            list of `bool`s denoting whether the corresponding generated image likely represents "not-safe-for-work"
-            (nsfw) content, according to the `safety_checker`.
+            When returning a tuple, the first element is a list with the generated images.
         """
         message = "Please use `image` instead of `init_image`."
         init_image = deprecate("init_image", "0.14.0", message, take_from=kwargs)
@@ -854,17 +828,14 @@ class OnnxStableDiffusionLongPromptWeightingPipeline(OnnxStableDiffusionPipeline
         # 9. Post-processing
         image = self.decode_latents(latents)
 
-        # 10. Run safety checker
-        image, has_nsfw_concept = self.run_safety_checker(image)
-
         # 11. Convert to PIL
         if output_type == "pil":
             image = self.numpy_to_pil(image)
 
         if not return_dict:
-            return image, has_nsfw_concept
+            return image
 
-        return StableDiffusionPipelineOutput(images=image, nsfw_content_detected=has_nsfw_concept)
+        return StableDiffusionPipelineOutput(images=image)
 
     def text2img(
         self,
@@ -935,9 +906,7 @@ class OnnxStableDiffusionLongPromptWeightingPipeline(OnnxStableDiffusionPipeline
         Returns:
             [`~pipelines.stable_diffusion.StableDiffusionPipelineOutput`] or `tuple`:
             [`~pipelines.stable_diffusion.StableDiffusionPipelineOutput`] if `return_dict` is True, otherwise a `tuple.
-            When returning a tuple, the first element is a list with the generated images, and the second element is a
-            list of `bool`s denoting whether the corresponding generated image likely represents "not-safe-for-work"
-            (nsfw) content, according to the `safety_checker`.
+            When returning a tuple, the first element is a list with the generated images.
         """
         return self.__call__(
             prompt=prompt,
@@ -1027,9 +996,7 @@ class OnnxStableDiffusionLongPromptWeightingPipeline(OnnxStableDiffusionPipeline
         Returns:
             [`~pipelines.stable_diffusion.StableDiffusionPipelineOutput`] or `tuple`:
             [`~pipelines.stable_diffusion.StableDiffusionPipelineOutput`] if `return_dict` is True, otherwise a `tuple.
-            When returning a tuple, the first element is a list with the generated images, and the second element is a
-            list of `bool`s denoting whether the corresponding generated image likely represents "not-safe-for-work"
-            (nsfw) content, according to the `safety_checker`.
+            When returning a tuple, the first element is a list with the generated images.
         """
         return self.__call__(
             prompt=prompt,
@@ -1123,9 +1090,7 @@ class OnnxStableDiffusionLongPromptWeightingPipeline(OnnxStableDiffusionPipeline
         Returns:
             [`~pipelines.stable_diffusion.StableDiffusionPipelineOutput`] or `tuple`:
             [`~pipelines.stable_diffusion.StableDiffusionPipelineOutput`] if `return_dict` is True, otherwise a `tuple.
-            When returning a tuple, the first element is a list with the generated images, and the second element is a
-            list of `bool`s denoting whether the corresponding generated image likely represents "not-safe-for-work"
-            (nsfw) content, according to the `safety_checker`.
+            When returning a tuple, the first element is a list with the generated images.
         """
         return self.__call__(
             prompt=prompt,

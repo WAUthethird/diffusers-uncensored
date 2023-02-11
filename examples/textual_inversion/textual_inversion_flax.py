@@ -34,7 +34,6 @@ from diffusers import (
     FlaxStableDiffusionPipeline,
     FlaxUNet2DConditionModel,
 )
-from diffusers.pipelines.stable_diffusion import FlaxStableDiffusionSafetyChecker
 from diffusers.utils import check_min_version
 
 
@@ -630,16 +629,12 @@ def main():
         scheduler = FlaxPNDMScheduler(
             beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear", skip_prk_steps=True
         )
-        safety_checker = FlaxStableDiffusionSafetyChecker.from_pretrained(
-            "CompVis/stable-diffusion-safety-checker", from_pt=True
-        )
         pipeline = FlaxStableDiffusionPipeline(
             text_encoder=text_encoder,
             vae=vae,
             unet=unet,
             tokenizer=tokenizer,
             scheduler=scheduler,
-            safety_checker=safety_checker,
             feature_extractor=CLIPFeatureExtractor.from_pretrained("openai/clip-vit-base-patch32"),
         )
 
@@ -649,7 +644,6 @@ def main():
                 "text_encoder": get_params_to_save(state.params),
                 "vae": get_params_to_save(vae_params),
                 "unet": get_params_to_save(unet_params),
-                "safety_checker": safety_checker.params,
             },
         )
 

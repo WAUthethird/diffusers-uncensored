@@ -38,7 +38,6 @@ from diffusers import (
 )
 from diffusers.pipelines.latent_diffusion.pipeline_latent_diffusion import LDMBertConfig, LDMBertModel
 from diffusers.pipelines.paint_by_example import PaintByExampleImageEncoder, PaintByExamplePipeline
-from diffusers.pipelines.stable_diffusion import StableDiffusionSafetyChecker
 
 from ...utils import is_omegaconf_available, is_safetensors_available, logging
 from ...utils.import_utils import BACKENDS_MAPPING
@@ -982,35 +981,26 @@ def load_pipeline_from_original_stable_diffusion_ckpt(
             tokenizer=tokenizer,
             unet=unet,
             scheduler=scheduler,
-            safety_checker=None,
             feature_extractor=None,
-            requires_safety_checker=False,
         )
     elif model_type == "PaintByExample":
         vision_model = convert_paint_by_example_checkpoint(checkpoint)
         tokenizer = CLIPTokenizer.from_pretrained("openai/clip-vit-large-patch14")
-        feature_extractor = AutoFeatureExtractor.from_pretrained("CompVis/stable-diffusion-safety-checker")
         pipe = PaintByExamplePipeline(
             vae=vae,
             image_encoder=vision_model,
             unet=unet,
             scheduler=scheduler,
-            safety_checker=None,
-            feature_extractor=feature_extractor,
         )
     elif model_type == "FrozenCLIPEmbedder":
         text_model = convert_ldm_clip_checkpoint(checkpoint)
         tokenizer = CLIPTokenizer.from_pretrained("openai/clip-vit-large-patch14")
-        safety_checker = StableDiffusionSafetyChecker.from_pretrained("CompVis/stable-diffusion-safety-checker")
-        feature_extractor = AutoFeatureExtractor.from_pretrained("CompVis/stable-diffusion-safety-checker")
         pipe = StableDiffusionPipeline(
             vae=vae,
             text_encoder=text_model,
             tokenizer=tokenizer,
             unet=unet,
             scheduler=scheduler,
-            safety_checker=safety_checker,
-            feature_extractor=feature_extractor,
         )
     else:
         text_config = create_ldm_bert_config(original_config)

@@ -152,14 +152,6 @@ Three things are worth paying attention to here.
 Not only the scheduler components can be customized for diffusion pipelines; in theory, all components of a pipeline can be customized. In practice, however, it often only makes sense to switch out a component that has **compatible** alternatives to what the pipeline expects.
 Many scheduler classes are compatible with each other as can be seen [here](https://github.com/huggingface/diffusers/blob/0dd8c6b4dbab4069de9ed1cafb53cbd495873879/src/diffusers/schedulers/scheduling_ddim.py#L112). This is not always the case for other components, such as the `"unet"`.
 
-One special case that can also be customized is the `"safety_checker"` of stable diffusion. If you believe the safety checker doesn't serve you any good, you can simply disable it by passing `None`:
-
-```python
-from diffusers import DiffusionPipeline, EulerDiscreteScheduler, DPMSolverMultistepScheduler
-
-stable_diffusion = DiffusionPipeline.from_pretrained(repo_id, safety_checker=None)
-```
-
 Another common use case is to reuse the same components in multiple pipelines, *e.g.* the weights and configurations of [`"runwayml/stable-diffusion-v1-5"`](https://huggingface.co/runwayml/stable-diffusion-v1-5) can be used for both [`StableDiffusionPipeline`] and [`StableDiffusionImg2ImgPipeline`] and we might not want to 
 use the exact same weights into RAM twice. In this case, customizing all the input instances would help us 
 to only load the weights into RAM once:

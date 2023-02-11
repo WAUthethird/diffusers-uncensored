@@ -85,7 +85,6 @@ class StableDiffusion2InpaintPipelineFastTests(PipelineTesterMixin, unittest.Tes
             "vae": vae,
             "text_encoder": text_encoder,
             "tokenizer": tokenizer,
-            "safety_checker": None,
             "feature_extractor": None,
         }
         return components
@@ -151,7 +150,7 @@ class StableDiffusionInpaintPipelineIntegrationTests(unittest.TestCase):
         )
 
         model_id = "stabilityai/stable-diffusion-2-inpainting"
-        pipe = StableDiffusionInpaintPipeline.from_pretrained(model_id, safety_checker=None)
+        pipe = StableDiffusionInpaintPipeline.from_pretrained(model_id,)
         pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)
         pipe.enable_attention_slicing()
@@ -188,7 +187,6 @@ class StableDiffusionInpaintPipelineIntegrationTests(unittest.TestCase):
         pipe = StableDiffusionInpaintPipeline.from_pretrained(
             model_id,
             torch_dtype=torch.float16,
-            safety_checker=None,
         )
         pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)
@@ -226,7 +224,6 @@ class StableDiffusionInpaintPipelineIntegrationTests(unittest.TestCase):
         pndm = PNDMScheduler.from_pretrained(model_id, subfolder="scheduler")
         pipe = StableDiffusionInpaintPipeline.from_pretrained(
             model_id,
-            safety_checker=None,
             scheduler=pndm,
             torch_dtype=torch.float16,
         )

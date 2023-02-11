@@ -85,7 +85,6 @@ class StableDiffusionImg2ImgPipelineFastTests(PipelineTesterMixin, unittest.Test
             "vae": vae,
             "text_encoder": text_encoder,
             "tokenizer": tokenizer,
-            "safety_checker": None,
             "feature_extractor": None,
         }
         return components
@@ -240,7 +239,7 @@ class StableDiffusionImg2ImgPipelineSlowTests(unittest.TestCase):
         return inputs
 
     def test_stable_diffusion_img2img_default(self):
-        pipe = StableDiffusionImg2ImgPipeline.from_pretrained("CompVis/stable-diffusion-v1-4", safety_checker=None)
+        pipe = StableDiffusionImg2ImgPipeline.from_pretrained("CompVis/stable-diffusion-v1-4",)
         pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)
         pipe.enable_attention_slicing()
@@ -255,7 +254,7 @@ class StableDiffusionImg2ImgPipelineSlowTests(unittest.TestCase):
         assert np.abs(expected_slice - image_slice).max() < 1e-3
 
     def test_stable_diffusion_img2img_k_lms(self):
-        pipe = StableDiffusionImg2ImgPipeline.from_pretrained("CompVis/stable-diffusion-v1-4", safety_checker=None)
+        pipe = StableDiffusionImg2ImgPipeline.from_pretrained("CompVis/stable-diffusion-v1-4",)
         pipe.scheduler = LMSDiscreteScheduler.from_config(pipe.scheduler.config)
         pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)
@@ -271,7 +270,7 @@ class StableDiffusionImg2ImgPipelineSlowTests(unittest.TestCase):
         assert np.abs(expected_slice - image_slice).max() < 1e-3
 
     def test_stable_diffusion_img2img_ddim(self):
-        pipe = StableDiffusionImg2ImgPipeline.from_pretrained("CompVis/stable-diffusion-v1-4", safety_checker=None)
+        pipe = StableDiffusionImg2ImgPipeline.from_pretrained("CompVis/stable-diffusion-v1-4",)
         pipe.scheduler = DDIMScheduler.from_config(pipe.scheduler.config)
         pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)
@@ -311,7 +310,7 @@ class StableDiffusionImg2ImgPipelineSlowTests(unittest.TestCase):
         callback_fn.has_been_called = False
 
         pipe = StableDiffusionImg2ImgPipeline.from_pretrained(
-            "CompVis/stable-diffusion-v1-4", safety_checker=None, torch_dtype=torch.float16
+            "CompVis/stable-diffusion-v1-4", torch_dtype=torch.float16
         )
         pipe = pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)
@@ -328,7 +327,7 @@ class StableDiffusionImg2ImgPipelineSlowTests(unittest.TestCase):
         torch.cuda.reset_peak_memory_stats()
 
         pipe = StableDiffusionImg2ImgPipeline.from_pretrained(
-            "CompVis/stable-diffusion-v1-4", safety_checker=None, torch_dtype=torch.float16
+            "CompVis/stable-diffusion-v1-4", torch_dtype=torch.float16
         )
         pipe = pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)
@@ -353,7 +352,6 @@ class StableDiffusionImg2ImgPipelineSlowTests(unittest.TestCase):
         model_id = "CompVis/stable-diffusion-v1-4"
         pipe = StableDiffusionImg2ImgPipeline.from_pretrained(
             model_id,
-            safety_checker=None,
         )
         pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)

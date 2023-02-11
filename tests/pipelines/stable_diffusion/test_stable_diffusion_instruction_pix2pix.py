@@ -86,7 +86,6 @@ class StableDiffusionInstructPix2PixPipelineFastTests(PipelineTesterMixin, unitt
             "vae": vae,
             "text_encoder": text_encoder,
             "tokenizer": tokenizer,
-            "safety_checker": None,
             "feature_extractor": None,
         }
         return components
@@ -251,7 +250,7 @@ class StableDiffusionInstructPix2PixPipelineSlowTests(unittest.TestCase):
 
     def test_stable_diffusion_pix2pix_default(self):
         pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(
-            "timbrooks/instruct-pix2pix", safety_checker=None
+            "timbrooks/instruct-pix2pix",
         )
         pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)
@@ -268,7 +267,7 @@ class StableDiffusionInstructPix2PixPipelineSlowTests(unittest.TestCase):
 
     def test_stable_diffusion_pix2pix_k_lms(self):
         pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(
-            "timbrooks/instruct-pix2pix", safety_checker=None
+            "timbrooks/instruct-pix2pix",
         )
         pipe.scheduler = LMSDiscreteScheduler.from_config(pipe.scheduler.config)
         pipe.to(torch_device)
@@ -286,7 +285,7 @@ class StableDiffusionInstructPix2PixPipelineSlowTests(unittest.TestCase):
 
     def test_stable_diffusion_pix2pix_ddim(self):
         pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(
-            "timbrooks/instruct-pix2pix", safety_checker=None
+            "timbrooks/instruct-pix2pix",
         )
         pipe.scheduler = DDIMScheduler.from_config(pipe.scheduler.config)
         pipe.to(torch_device)
@@ -327,7 +326,7 @@ class StableDiffusionInstructPix2PixPipelineSlowTests(unittest.TestCase):
         callback_fn.has_been_called = False
 
         pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(
-            "timbrooks/instruct-pix2pix", safety_checker=None, torch_dtype=torch.float16
+            "timbrooks/instruct-pix2pix", torch_dtype=torch.float16
         )
         pipe = pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)
@@ -344,7 +343,7 @@ class StableDiffusionInstructPix2PixPipelineSlowTests(unittest.TestCase):
         torch.cuda.reset_peak_memory_stats()
 
         pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(
-            "timbrooks/instruct-pix2pix", safety_checker=None, torch_dtype=torch.float16
+            "timbrooks/instruct-pix2pix", torch_dtype=torch.float16
         )
         pipe = pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)
@@ -366,7 +365,6 @@ class StableDiffusionInstructPix2PixPipelineSlowTests(unittest.TestCase):
         model_id = "timbrooks/instruct-pix2pix"
         pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(
             model_id,
-            safety_checker=None,
         )
         pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)

@@ -16,7 +16,6 @@ from diffusers import (
     UNet2DConditionModel,
 )
 from diffusers.configuration_utils import FrozenDict
-from diffusers.pipelines.stable_diffusion.safety_checker import StableDiffusionSafetyChecker
 from diffusers.utils import deprecate, logging
 
 
@@ -44,13 +43,8 @@ class StableDiffusionMegaPipeline(DiffusionPipeline):
         scheduler ([`SchedulerMixin`]):
             A scheduler to be used in combination with `unet` to denoise the encoded image latents. Can be one of
             [`DDIMScheduler`], [`LMSDiscreteScheduler`], or [`PNDMScheduler`].
-        safety_checker ([`StableDiffusionMegaSafetyChecker`]):
-            Classification module that estimates whether generated images could be considered offensive or harmful.
-            Please, refer to the [model card](https://huggingface.co/runwayml/stable-diffusion-v1-5) for details.
-        feature_extractor ([`CLIPFeatureExtractor`]):
-            Model that extracts features from generated images to be used as inputs for the `safety_checker`.
     """
-    _optional_components = ["safety_checker", "feature_extractor"]
+    _optional_components = ["feature_extractor"]
 
     def __init__(
         self,
@@ -59,9 +53,7 @@ class StableDiffusionMegaPipeline(DiffusionPipeline):
         tokenizer: CLIPTokenizer,
         unet: UNet2DConditionModel,
         scheduler: Union[DDIMScheduler, PNDMScheduler, LMSDiscreteScheduler],
-        safety_checker: StableDiffusionSafetyChecker,
         feature_extractor: CLIPFeatureExtractor,
-        requires_safety_checker: bool = True,
     ):
         super().__init__()
         if hasattr(scheduler.config, "steps_offset") and scheduler.config.steps_offset != 1:
@@ -84,10 +76,8 @@ class StableDiffusionMegaPipeline(DiffusionPipeline):
             tokenizer=tokenizer,
             unet=unet,
             scheduler=scheduler,
-            safety_checker=safety_checker,
             feature_extractor=feature_extractor,
         )
-        self.register_to_config(requires_safety_checker=requires_safety_checker)
 
     @property
     def components(self) -> Dict[str, Any]:

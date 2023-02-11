@@ -62,7 +62,7 @@ class DownloadTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdirname:
             # pipeline has Flax weights
             _ = DiffusionPipeline.from_pretrained(
-                "hf-internal-testing/tiny-stable-diffusion-pipe", safety_checker=None, cache_dir=tmpdirname
+                "hf-internal-testing/tiny-stable-diffusion-pipe", cache_dir=tmpdirname
             )
 
             all_root_files = [t[-1] for t in os.walk(os.path.join(tmpdirname, os.listdir(tmpdirname)[0], "snapshots"))]
@@ -77,10 +77,10 @@ class DownloadTests(unittest.TestCase):
     def test_returned_cached_folder(self):
         prompt = "hello"
         pipe = StableDiffusionPipeline.from_pretrained(
-            "hf-internal-testing/tiny-stable-diffusion-torch", safety_checker=None
+            "hf-internal-testing/tiny-stable-diffusion-torch",
         )
         _, local_path = StableDiffusionPipeline.from_pretrained(
-            "hf-internal-testing/tiny-stable-diffusion-torch", safety_checker=None, return_cached_folder=True
+            "hf-internal-testing/tiny-stable-diffusion-torch", return_cached_folder=True
         )
         pipe_2 = StableDiffusionPipeline.from_pretrained(local_path)
 
@@ -92,77 +92,6 @@ class DownloadTests(unittest.TestCase):
 
         generator = torch.manual_seed(0)
         out_2 = pipe_2(prompt, num_inference_steps=2, generator=generator, output_type="numpy").images
-
-        assert np.max(np.abs(out - out_2)) < 1e-3
-
-    def test_download_safetensors(self):
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            # pipeline has Flax weights
-            _ = DiffusionPipeline.from_pretrained(
-                "hf-internal-testing/tiny-stable-diffusion-pipe-safetensors",
-                safety_checker=None,
-                cache_dir=tmpdirname,
-            )
-
-            all_root_files = [t[-1] for t in os.walk(os.path.join(tmpdirname, os.listdir(tmpdirname)[0], "snapshots"))]
-            files = [item for sublist in all_root_files for item in sublist]
-
-            # None of the downloaded files should be a pytorch file even if we have some here:
-            # https://huggingface.co/hf-internal-testing/tiny-stable-diffusion-pipe/blob/main/unet/diffusion_flax_model.msgpack
-            assert not any(f.endswith(".bin") for f in files)
-
-    def test_download_no_safety_checker(self):
-        prompt = "hello"
-        pipe = StableDiffusionPipeline.from_pretrained(
-            "hf-internal-testing/tiny-stable-diffusion-torch", safety_checker=None
-        )
-        pipe = pipe.to(torch_device)
-        generator = torch.manual_seed(0)
-        out = pipe(prompt, num_inference_steps=2, generator=generator, output_type="numpy").images
-
-        pipe_2 = StableDiffusionPipeline.from_pretrained("hf-internal-testing/tiny-stable-diffusion-torch")
-        pipe_2 = pipe_2.to(torch_device)
-        generator = torch.manual_seed(0)
-        out_2 = pipe_2(prompt, num_inference_steps=2, generator=generator, output_type="numpy").images
-
-        assert np.max(np.abs(out - out_2)) < 1e-3
-
-    def test_load_no_safety_checker_explicit_locally(self):
-        prompt = "hello"
-        pipe = StableDiffusionPipeline.from_pretrained(
-            "hf-internal-testing/tiny-stable-diffusion-torch", safety_checker=None
-        )
-        pipe = pipe.to(torch_device)
-        generator = torch.manual_seed(0)
-        out = pipe(prompt, num_inference_steps=2, generator=generator, output_type="numpy").images
-
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            pipe.save_pretrained(tmpdirname)
-            pipe_2 = StableDiffusionPipeline.from_pretrained(tmpdirname, safety_checker=None)
-            pipe_2 = pipe_2.to(torch_device)
-
-            generator = torch.manual_seed(0)
-
-            out_2 = pipe_2(prompt, num_inference_steps=2, generator=generator, output_type="numpy").images
-
-        assert np.max(np.abs(out - out_2)) < 1e-3
-
-    def test_load_no_safety_checker_default_locally(self):
-        prompt = "hello"
-        pipe = StableDiffusionPipeline.from_pretrained("hf-internal-testing/tiny-stable-diffusion-torch")
-        pipe = pipe.to(torch_device)
-
-        generator = torch.manual_seed(0)
-        out = pipe(prompt, num_inference_steps=2, generator=generator, output_type="numpy").images
-
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            pipe.save_pretrained(tmpdirname)
-            pipe_2 = StableDiffusionPipeline.from_pretrained(tmpdirname)
-            pipe_2 = pipe_2.to(torch_device)
-
-            generator = torch.manual_seed(0)
-
-            out_2 = pipe_2(prompt, num_inference_steps=2, generator=generator, output_type="numpy").images
 
         assert np.max(np.abs(out - out_2)) < 1e-3
 
@@ -398,7 +327,6 @@ class PipelineFastTests(unittest.TestCase):
             vae=vae,
             text_encoder=bert,
             tokenizer=tokenizer,
-            safety_checker=None,
             feature_extractor=self.dummy_extractor,
         ).to(torch_device)
         img2img = StableDiffusionImg2ImgPipeline(**inpaint.components).to(torch_device)
@@ -446,7 +374,6 @@ class PipelineFastTests(unittest.TestCase):
             vae=vae,
             text_encoder=bert,
             tokenizer=tokenizer,
-            safety_checker=None,
             feature_extractor=self.dummy_extractor,
         )
 
@@ -479,7 +406,6 @@ class PipelineFastTests(unittest.TestCase):
             vae=vae,
             text_encoder=bert,
             tokenizer=tokenizer,
-            safety_checker=None,
             feature_extractor=self.dummy_extractor,
         )
 
@@ -497,7 +423,6 @@ class PipelineFastTests(unittest.TestCase):
             vae=vae,
             text_encoder=bert,
             tokenizer=tokenizer,
-            safety_checker=None,
             feature_extractor=self.dummy_extractor,
         )
 
@@ -593,23 +518,18 @@ class PipelineFastTests(unittest.TestCase):
             vae=vae,
             text_encoder=bert,
             tokenizer=tokenizer,
-            safety_checker=unet,
             feature_extractor=self.dummy_extractor,
         )
         sd = orig_sd
-
-        assert sd.config.requires_safety_checker is True
 
         with tempfile.TemporaryDirectory() as tmpdirname:
             sd.save_pretrained(tmpdirname)
 
             # Test that passing None works
             sd = StableDiffusionPipeline.from_pretrained(
-                tmpdirname, feature_extractor=None, safety_checker=None, requires_safety_checker=False
+                tmpdirname, feature_extractor=None
             )
 
-            assert sd.config.requires_safety_checker is False
-            assert sd.config.safety_checker == (None, None)
             assert sd.config.feature_extractor == (None, None)
 
         with tempfile.TemporaryDirectory() as tmpdirname:
@@ -618,40 +538,31 @@ class PipelineFastTests(unittest.TestCase):
             # Test that loading previous None works
             sd = StableDiffusionPipeline.from_pretrained(tmpdirname)
 
-            assert sd.config.requires_safety_checker is False
-            assert sd.config.safety_checker == (None, None)
             assert sd.config.feature_extractor == (None, None)
 
             orig_sd.save_pretrained(tmpdirname)
 
             # Test that loading without any directory works
-            shutil.rmtree(os.path.join(tmpdirname, "safety_checker"))
             with open(os.path.join(tmpdirname, sd.config_name)) as f:
                 config = json.load(f)
-                config["safety_checker"] = [None, None]
             with open(os.path.join(tmpdirname, sd.config_name), "w") as f:
                 json.dump(config, f)
 
-            sd = StableDiffusionPipeline.from_pretrained(tmpdirname, requires_safety_checker=False)
+            sd = StableDiffusionPipeline.from_pretrained(tmpdirname)
             sd.save_pretrained(tmpdirname)
             sd = StableDiffusionPipeline.from_pretrained(tmpdirname)
 
-            assert sd.config.requires_safety_checker is False
-            assert sd.config.safety_checker == (None, None)
             assert sd.config.feature_extractor == (None, None)
 
             # Test that loading from deleted model index works
             with open(os.path.join(tmpdirname, sd.config_name)) as f:
                 config = json.load(f)
-                del config["safety_checker"]
                 del config["feature_extractor"]
             with open(os.path.join(tmpdirname, sd.config_name), "w") as f:
                 json.dump(config, f)
 
             sd = StableDiffusionPipeline.from_pretrained(tmpdirname)
 
-            assert sd.config.requires_safety_checker is False
-            assert sd.config.safety_checker == (None, None)
             assert sd.config.feature_extractor == (None, None)
 
         with tempfile.TemporaryDirectory() as tmpdirname:
@@ -660,28 +571,20 @@ class PipelineFastTests(unittest.TestCase):
             # Test that partially loading works
             sd = StableDiffusionPipeline.from_pretrained(tmpdirname, feature_extractor=self.dummy_extractor)
 
-            assert sd.config.requires_safety_checker is False
-            assert sd.config.safety_checker == (None, None)
             assert sd.config.feature_extractor != (None, None)
 
             # Test that partially loading works
             sd = StableDiffusionPipeline.from_pretrained(
                 tmpdirname,
                 feature_extractor=self.dummy_extractor,
-                safety_checker=unet,
-                requires_safety_checker=[True, True],
             )
 
-            assert sd.config.requires_safety_checker == [True, True]
-            assert sd.config.safety_checker != (None, None)
             assert sd.config.feature_extractor != (None, None)
 
         with tempfile.TemporaryDirectory() as tmpdirname:
             sd.save_pretrained(tmpdirname)
             sd = StableDiffusionPipeline.from_pretrained(tmpdirname, feature_extractor=self.dummy_extractor)
 
-            assert sd.config.requires_safety_checker == [True, True]
-            assert sd.config.safety_checker != (None, None)
             assert sd.config.feature_extractor != (None, None)
 
 
@@ -830,7 +733,7 @@ class PipelineSlowTests(unittest.TestCase):
 
     def test_from_flax_from_pt(self):
         pipe_pt = StableDiffusionPipeline.from_pretrained(
-            "hf-internal-testing/tiny-stable-diffusion-torch", safety_checker=None
+            "hf-internal-testing/tiny-stable-diffusion-torch",
         )
         pipe_pt.to(torch_device)
 
@@ -843,12 +746,12 @@ class PipelineSlowTests(unittest.TestCase):
             pipe_pt.save_pretrained(tmpdirname)
 
             pipe_flax, params = FlaxStableDiffusionPipeline.from_pretrained(
-                tmpdirname, safety_checker=None, from_pt=True
+                tmpdirname, from_pt=True
             )
 
         with tempfile.TemporaryDirectory() as tmpdirname:
             pipe_flax.save_pretrained(tmpdirname, params=params)
-            pipe_pt_2 = StableDiffusionPipeline.from_pretrained(tmpdirname, safety_checker=None, from_flax=True)
+            pipe_pt_2 = StableDiffusionPipeline.from_pretrained(tmpdirname, from_flax=True)
             pipe_pt_2.to(torch_device)
 
         prompt = "Hello"

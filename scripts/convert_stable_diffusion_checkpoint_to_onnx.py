@@ -185,39 +185,8 @@ def convert_models(model_path: str, output_path: str, opset: int, fp16: bool = F
         opset=opset,
     )
     del pipeline.vae
-
-    # SAFETY CHECKER
-    if pipeline.safety_checker is not None:
-        safety_checker = pipeline.safety_checker
-        clip_num_channels = safety_checker.config.vision_config.num_channels
-        clip_image_size = safety_checker.config.vision_config.image_size
-        safety_checker.forward = safety_checker.forward_onnx
-        onnx_export(
-            pipeline.safety_checker,
-            model_args=(
-                torch.randn(
-                    1,
-                    clip_num_channels,
-                    clip_image_size,
-                    clip_image_size,
-                ).to(device=device, dtype=dtype),
-                torch.randn(1, vae_sample_size, vae_sample_size, vae_out_channels).to(device=device, dtype=dtype),
-            ),
-            output_path=output_path / "safety_checker" / "model.onnx",
-            ordered_input_names=["clip_input", "images"],
-            output_names=["out_images", "has_nsfw_concepts"],
-            dynamic_axes={
-                "clip_input": {0: "batch", 1: "channels", 2: "height", 3: "width"},
-                "images": {0: "batch", 1: "height", 2: "width", 3: "channels"},
-            },
-            opset=opset,
-        )
-        del pipeline.safety_checker
-        safety_checker = OnnxRuntimeModel.from_pretrained(output_path / "safety_checker")
-        feature_extractor = pipeline.feature_extractor
-    else:
-        safety_checker = None
-        feature_extractor = None
+    
+    feature_extractor = None
 
     onnx_pipeline = OnnxStableDiffusionPipeline(
         vae_encoder=OnnxRuntimeModel.from_pretrained(output_path / "vae_encoder"),
@@ -226,9 +195,7 @@ def convert_models(model_path: str, output_path: str, opset: int, fp16: bool = F
         tokenizer=pipeline.tokenizer,
         unet=OnnxRuntimeModel.from_pretrained(output_path / "unet"),
         scheduler=pipeline.scheduler,
-        safety_checker=safety_checker,
         feature_extractor=feature_extractor,
-        requires_safety_checker=safety_checker is not None,
     )
 
     onnx_pipeline.save_pretrained(output_path)

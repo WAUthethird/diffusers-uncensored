@@ -103,7 +103,6 @@ class AltDiffusionPipelineFastTests(PipelineTesterMixin, unittest.TestCase):
             "vae": vae,
             "text_encoder": text_encoder,
             "tokenizer": tokenizer,
-            "safety_checker": None,
             "feature_extractor": None,
         }
         return components
@@ -203,7 +202,7 @@ class AltDiffusionPipelineIntegrationTests(unittest.TestCase):
 
     def test_alt_diffusion(self):
         # make sure here that pndm scheduler skips prk
-        alt_pipe = AltDiffusionPipeline.from_pretrained("BAAI/AltDiffusion", safety_checker=None)
+        alt_pipe = AltDiffusionPipeline.from_pretrained("BAAI/AltDiffusion",)
         alt_pipe = alt_pipe.to(torch_device)
         alt_pipe.set_progress_bar_config(disable=None)
 
@@ -223,7 +222,7 @@ class AltDiffusionPipelineIntegrationTests(unittest.TestCase):
     def test_alt_diffusion_fast_ddim(self):
         scheduler = DDIMScheduler.from_pretrained("BAAI/AltDiffusion", subfolder="scheduler")
 
-        alt_pipe = AltDiffusionPipeline.from_pretrained("BAAI/AltDiffusion", scheduler=scheduler, safety_checker=None)
+        alt_pipe = AltDiffusionPipeline.from_pretrained("BAAI/AltDiffusion", scheduler=scheduler,)
         alt_pipe = alt_pipe.to(torch_device)
         alt_pipe.set_progress_bar_config(disable=None)
 

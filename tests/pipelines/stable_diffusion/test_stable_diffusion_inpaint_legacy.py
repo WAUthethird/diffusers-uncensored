@@ -176,7 +176,6 @@ class StableDiffusionInpaintLegacyPipelineFastTests(unittest.TestCase):
             vae=vae,
             text_encoder=bert,
             tokenizer=tokenizer,
-            safety_checker=None,
             feature_extractor=self.dummy_extractor,
         )
         sd_pipe = sd_pipe.to(device)
@@ -236,7 +235,6 @@ class StableDiffusionInpaintLegacyPipelineFastTests(unittest.TestCase):
             vae=vae,
             text_encoder=bert,
             tokenizer=tokenizer,
-            safety_checker=None,
             feature_extractor=self.dummy_extractor,
         )
         sd_pipe = sd_pipe.to(device)
@@ -283,7 +281,6 @@ class StableDiffusionInpaintLegacyPipelineFastTests(unittest.TestCase):
             vae=vae,
             text_encoder=bert,
             tokenizer=tokenizer,
-            safety_checker=None,
             feature_extractor=self.dummy_extractor,
         )
         sd_pipe = sd_pipe.to(device)
@@ -373,7 +370,7 @@ class StableDiffusionInpaintLegacyPipelineSlowTests(unittest.TestCase):
 
     def test_stable_diffusion_inpaint_legacy_pndm(self):
         pipe = StableDiffusionInpaintPipelineLegacy.from_pretrained(
-            "CompVis/stable-diffusion-v1-4", safety_checker=None
+            "CompVis/stable-diffusion-v1-4",
         )
         pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)
@@ -390,7 +387,7 @@ class StableDiffusionInpaintLegacyPipelineSlowTests(unittest.TestCase):
 
     def test_stable_diffusion_inpaint_legacy_k_lms(self):
         pipe = StableDiffusionInpaintPipelineLegacy.from_pretrained(
-            "CompVis/stable-diffusion-v1-4", safety_checker=None
+            "CompVis/stable-diffusion-v1-4",
         )
         pipe.scheduler = LMSDiscreteScheduler.from_config(pipe.scheduler.config)
         pipe.to(torch_device)
@@ -431,7 +428,7 @@ class StableDiffusionInpaintLegacyPipelineSlowTests(unittest.TestCase):
         callback_fn.has_been_called = False
 
         pipe = StableDiffusionInpaintPipelineLegacy.from_pretrained(
-            "CompVis/stable-diffusion-v1-4", safety_checker=None, torch_dtype=torch.float16
+            "CompVis/stable-diffusion-v1-4", torch_dtype=torch.float16
         )
         pipe = pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)

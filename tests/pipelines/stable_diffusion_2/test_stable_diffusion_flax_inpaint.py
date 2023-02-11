@@ -46,7 +46,7 @@ class FlaxStableDiffusionInpaintPipelineIntegrationTests(unittest.TestCase):
         )
 
         model_id = "xvjiarui/stable-diffusion-2-inpainting"
-        pipeline, params = FlaxStableDiffusionInpaintPipeline.from_pretrained(model_id, safety_checker=None)
+        pipeline, params = FlaxStableDiffusionInpaintPipeline.from_pretrained(model_id,)
 
         prompt = "Face of a yellow cat, high resolution, sitting on a park bench"
 

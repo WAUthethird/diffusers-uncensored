@@ -125,7 +125,6 @@ class AltDiffusionImg2ImgPipelineFastTests(unittest.TestCase):
             vae=vae,
             text_encoder=bert,
             tokenizer=tokenizer,
-            safety_checker=None,
             feature_extractor=self.dummy_extractor,
         )
         alt_pipe = alt_pipe.to(device)
@@ -188,7 +187,6 @@ class AltDiffusionImg2ImgPipelineFastTests(unittest.TestCase):
             vae=vae,
             text_encoder=bert,
             tokenizer=tokenizer,
-            safety_checker=None,
             feature_extractor=self.dummy_extractor,
         )
         alt_pipe = alt_pipe.to(torch_device)
@@ -218,7 +216,6 @@ class AltDiffusionImg2ImgPipelineFastTests(unittest.TestCase):
         model_id = "BAAI/AltDiffusion"
         pipe = AltDiffusionImg2ImgPipeline.from_pretrained(
             model_id,
-            safety_checker=None,
         )
         pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)
@@ -267,7 +264,6 @@ class AltDiffusionImg2ImgPipelineIntegrationTests(unittest.TestCase):
         model_id = "BAAI/AltDiffusion"
         pipe = AltDiffusionImg2ImgPipeline.from_pretrained(
             model_id,
-            safety_checker=None,
         )
         pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)

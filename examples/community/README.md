@@ -116,7 +116,7 @@ pipe = DiffusionPipeline.from_pretrained(
     "CompVis/stable-diffusion-v1-4",
     revision='fp16',
     torch_dtype=torch.float16,
-    safety_checker=None,  # Very important for videos...lots of false positives while interpolating
+     # Very important for videos...lots of false positives while interpolating
     custom_pipeline="interpolate_stable_diffusion",
 ).to('cuda')
 pipe.enable_attention_slicing()
@@ -385,8 +385,6 @@ pipe = DiffusionPipeline.from_pretrained(
     custom_pipeline="composable_stable_diffusion",
 ).to(device)
 
-pipe.safety_checker = None
-
 images = []
 generator = th.Generator("cuda").manual_seed(args.seed)
 for i in range(args.num_images):
@@ -412,7 +410,7 @@ has_cuda = torch.cuda.is_available()
 device = torch.device('cpu' if not has_cuda else 'cuda')
 pipe = DiffusionPipeline.from_pretrained(
     "CompVis/stable-diffusion-v1-4",
-        safety_checker=None,
+       
     use_auth_token=True,
     custom_pipeline="imagic_stable_diffusion",
     scheduler = DDIMScheduler(beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear", clip_sample=False, set_alpha_to_one=False)
@@ -459,8 +457,6 @@ pipe = DiffusionPipeline.from_pretrained(
 
 def dummy(images, **kwargs):
     return images, False
-
-pipe.safety_checker = dummy
 
 
 images = []

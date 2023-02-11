@@ -117,9 +117,7 @@ class StableDiffusion2VPredictionPipelineFastTests(unittest.TestCase):
             vae=vae,
             text_encoder=bert,
             tokenizer=tokenizer,
-            safety_checker=None,
             feature_extractor=None,
-            requires_safety_checker=False,
         )
         sd_pipe = sd_pipe.to(device)
         sd_pipe.set_progress_bar_config(disable=None)
@@ -166,9 +164,7 @@ class StableDiffusion2VPredictionPipelineFastTests(unittest.TestCase):
             vae=vae,
             text_encoder=bert,
             tokenizer=tokenizer,
-            safety_checker=None,
             feature_extractor=None,
-            requires_safety_checker=False,
         )
         sd_pipe = sd_pipe.to(device)
         sd_pipe.set_progress_bar_config(disable=None)
@@ -226,9 +222,7 @@ class StableDiffusion2VPredictionPipelineFastTests(unittest.TestCase):
             vae=vae,
             text_encoder=bert,
             tokenizer=tokenizer,
-            safety_checker=None,
             feature_extractor=None,
-            requires_safety_checker=False,
         )
         sd_pipe = sd_pipe.to(torch_device)
         sd_pipe.set_progress_bar_config(disable=None)

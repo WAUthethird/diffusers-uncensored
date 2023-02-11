@@ -162,7 +162,7 @@ class FlaxDiffusionPipeline(ConfigMixin):
         for pipeline_component_name in model_index_dict.keys():
             sub_model = getattr(self, pipeline_component_name)
             if sub_model is None:
-                # edge case for saving a pipeline with safety_checker=None
+                # edge case for saving a pipeline with
                 continue
 
             model_cls = sub_model.__class__
@@ -381,7 +381,7 @@ class FlaxDiffusionPipeline(ConfigMixin):
         # 3. Load each module in the pipeline
         for name, (library_name, class_name) in init_dict.items():
             if class_name is None:
-                # edge case for when the pipeline was saved with safety_checker=None
+                # edge case for when the pipeline was saved with
                 init_kwargs[name] = None
                 continue
 

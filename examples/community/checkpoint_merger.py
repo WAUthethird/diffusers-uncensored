@@ -221,7 +221,7 @@ class CheckpointMergerPipeline(DiffusionPipeline):
                     continue
                 try:
                     module = getattr(final_pipe, attr)
-                    if isinstance(module, bool):  # ignore requires_safety_checker boolean
+                    if isinstance(module, bool):
                         continue
                     theta_0 = getattr(module, "state_dict")
                     theta_0 = theta_0()

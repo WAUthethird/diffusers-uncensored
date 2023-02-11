@@ -31,7 +31,6 @@ from diffusers import (
     FlaxStableDiffusionPipeline,
     FlaxUNet2DConditionModel,
 )
-from diffusers.pipelines.stable_diffusion import FlaxStableDiffusionSafetyChecker
 from diffusers.utils import check_min_version
 
 
@@ -356,7 +355,7 @@ def main():
 
         if cur_class_images < args.num_class_images:
             pipeline, params = FlaxStableDiffusionPipeline.from_pretrained(
-                args.pretrained_model_name_or_path, safety_checker=None, revision=args.revision
+                args.pretrained_model_name_or_path, revision=args.revision
             )
             pipeline.set_progress_bar_config(disable=True)
 
@@ -637,16 +636,12 @@ def main():
     def checkpoint(step=None):
         # Create the pipeline using the trained modules and save it.
         scheduler, _ = FlaxPNDMScheduler.from_pretrained("CompVis/stable-diffusion-v1-4", subfolder="scheduler")
-        safety_checker = FlaxStableDiffusionSafetyChecker.from_pretrained(
-            "CompVis/stable-diffusion-safety-checker", from_pt=True
-        )
         pipeline = FlaxStableDiffusionPipeline(
             text_encoder=text_encoder,
             vae=vae,
             unet=unet,
             tokenizer=tokenizer,
             scheduler=scheduler,
-            safety_checker=safety_checker,
             feature_extractor=CLIPFeatureExtractor.from_pretrained("openai/clip-vit-base-patch32"),
         )
 
@@ -657,7 +652,6 @@ def main():
                 "text_encoder": get_params_to_save(text_encoder_state.params),
                 "vae": get_params_to_save(vae_params),
                 "unet": get_params_to_save(unet_state.params),
-                "safety_checker": safety_checker.params,
             },
         )
 

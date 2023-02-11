@@ -83,7 +83,6 @@ class StableDiffusionImageVariationPipelineFastTests(PipelineTesterMixin, unitte
             "vae": vae,
             "image_encoder": image_encoder,
             "feature_extractor": feature_extractor,
-            "safety_checker": None,
         }
         return components
 
@@ -205,7 +204,7 @@ class StableDiffusionImageVariationPipelineSlowTests(unittest.TestCase):
 
     def test_stable_diffusion_img_variation_pipeline_default(self):
         sd_pipe = StableDiffusionImageVariationPipeline.from_pretrained(
-            "lambdalabs/sd-image-variations-diffusers", safety_checker=None
+            "lambdalabs/sd-image-variations-diffusers",
         )
         sd_pipe = sd_pipe.to(torch_device)
         sd_pipe.set_progress_bar_config(disable=None)
@@ -246,7 +245,6 @@ class StableDiffusionImageVariationPipelineSlowTests(unittest.TestCase):
 
         pipe = StableDiffusionImageVariationPipeline.from_pretrained(
             "fusing/sd-image-variations-diffusers",
-            safety_checker=None,
             torch_dtype=torch.float16,
         )
         pipe.to(torch_device)
@@ -265,7 +263,7 @@ class StableDiffusionImageVariationPipelineSlowTests(unittest.TestCase):
 
         model_id = "fusing/sd-image-variations-diffusers"
         pipe = StableDiffusionImageVariationPipeline.from_pretrained(
-            model_id, safety_checker=None, torch_dtype=torch.float16
+            model_id, torch_dtype=torch.float16
         )
         pipe = pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)

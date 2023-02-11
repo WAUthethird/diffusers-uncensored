@@ -39,7 +39,7 @@ class DownloadTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdirname:
             # pipeline has Flax weights
             _ = FlaxDiffusionPipeline.from_pretrained(
-                "hf-internal-testing/tiny-stable-diffusion-pipe", safety_checker=None, cache_dir=tmpdirname
+                "hf-internal-testing/tiny-stable-diffusion-pipe", cache_dir=tmpdirname
             )
 
             all_root_files = [t[-1] for t in os.walk(os.path.join(tmpdirname, os.listdir(tmpdirname)[0], "snapshots"))]
@@ -55,7 +55,7 @@ class DownloadTests(unittest.TestCase):
 class FlaxPipelineTests(unittest.TestCase):
     def test_dummy_all_tpus(self):
         pipeline, params = FlaxStableDiffusionPipeline.from_pretrained(
-            "hf-internal-testing/tiny-stable-diffusion-pipe", safety_checker=None
+            "hf-internal-testing/tiny-stable-diffusion-pipe",
         )
 
         prompt = (
@@ -90,7 +90,7 @@ class FlaxPipelineTests(unittest.TestCase):
 
     def test_stable_diffusion_v1_4(self):
         pipeline, params = FlaxStableDiffusionPipeline.from_pretrained(
-            "CompVis/stable-diffusion-v1-4", revision="flax", safety_checker=None
+            "CompVis/stable-diffusion-v1-4", revision="flax",
         )
 
         prompt = (
@@ -121,7 +121,7 @@ class FlaxPipelineTests(unittest.TestCase):
 
     def test_stable_diffusion_v1_4_bfloat_16(self):
         pipeline, params = FlaxStableDiffusionPipeline.from_pretrained(
-            "CompVis/stable-diffusion-v1-4", revision="bf16", dtype=jnp.bfloat16, safety_checker=None
+            "CompVis/stable-diffusion-v1-4", revision="bf16", dtype=jnp.bfloat16,
         )
 
         prompt = (
@@ -150,35 +150,6 @@ class FlaxPipelineTests(unittest.TestCase):
             assert np.abs((np.abs(images[0, 0, :2, :2, -2:], dtype=np.float32).sum() - 0.06652832)) < 1e-3
             assert np.abs((np.abs(images, dtype=np.float32).sum() - 2384849.8)) < 5e-1
 
-    def test_stable_diffusion_v1_4_bfloat_16_with_safety(self):
-        pipeline, params = FlaxStableDiffusionPipeline.from_pretrained(
-            "CompVis/stable-diffusion-v1-4", revision="bf16", dtype=jnp.bfloat16
-        )
-
-        prompt = (
-            "A cinematic film still of Morgan Freeman starring as Jimi Hendrix, portrait, 40mm lens, shallow depth of"
-            " field, close up, split lighting, cinematic"
-        )
-
-        prng_seed = jax.random.PRNGKey(0)
-        num_inference_steps = 50
-
-        num_samples = jax.device_count()
-        prompt = num_samples * [prompt]
-        prompt_ids = pipeline.prepare_inputs(prompt)
-
-        # shard inputs and rng
-        params = replicate(params)
-        prng_seed = jax.random.split(prng_seed, num_samples)
-        prompt_ids = shard(prompt_ids)
-
-        images = pipeline(prompt_ids, params, prng_seed, num_inference_steps, jit=True).images
-
-        assert images.shape == (num_samples, 1, 512, 512, 3)
-        if jax.device_count() == 8:
-            assert np.abs((np.abs(images[0, 0, :2, :2, -2:], dtype=np.float32).sum() - 0.06652832)) < 1e-3
-            assert np.abs((np.abs(images, dtype=np.float32).sum() - 2384849.8)) < 5e-1
-
     def test_stable_diffusion_v1_4_bfloat_16_ddim(self):
         scheduler = FlaxDDIMScheduler(
             beta_start=0.00085,
@@ -193,7 +164,6 @@ class FlaxPipelineTests(unittest.TestCase):
             revision="bf16",
             dtype=jnp.bfloat16,
             scheduler=scheduler,
-            safety_checker=None,
         )
         scheduler_state = scheduler.create_state()
 
